@@ -24,19 +24,26 @@ def myKmeans(data:list, k:int):
     dimensions = len(data[0])
     centroids = centroids_init(dimensions,k)
     
-    #TODO: Add euclidian distance calculation of centroids from data_points
     list_of_distances = []
-    for centroid in centroids:
+    for data_point in data:
         distances = []
-        for data_point in data:
-            dist = int(np.linalg.norm(np.array(centroid) - np.array(data_point)))
+        for centroid in centroids:
+            dist = float(np.linalg.norm(np.array(data_point) - np.array(centroid)))
             distances.append(dist)
         list_of_distances.append(distances)
+
+    #κατηγοριοποίηση καθε στοιχείου.
+    cluster_assignments = []
+
+    for i in list_of_distances:
+        cluster_assignments.append(i.index(min(i))+1)
+
     
-    return list_of_distances
+    
+    return cluster_assignments
 
 def main():
-    test = myKmeans([[1,2],[2,3],[3,4]], 2)
+    test = myKmeans([[1,1],[5,3],[10,10],[2,19],[19,2]], 2)
     print(test)
 
 if __name__ == "__main__":
