@@ -1,16 +1,22 @@
 import numpy as np
 import random
 
-def centroids_init(dimensions:int, k:int) -> list:
-    list_of_centroids = []
+def distance_calulator(data:list, centroids:list):
+    """
+    Receives two lists of the same dimensions
+    Returns the distances of every data point from every centroid
 
-    for _ in range(k):
-        centroid = []
-        for _ in range(dimensions):
-            centroid.append(random.randrange(0,20))
-        list_of_centroids.append(centroid)
-    
-    return list_of_centroids
+    """
+    list_of_distances = []
+    for data_point in data:
+        distances = []
+        for centroid in centroids:
+            dist = float(np.linalg.norm(np.array(data_point) - np.array(centroid)))
+            distances.append(dist)
+        list_of_distances.append(distances)
+
+    return list_of_distances
+
 
 def myKmeans(data:list, k:int):
     """
@@ -21,29 +27,41 @@ def myKmeans(data:list, k:int):
     a list of the cluster values for each point of data
 
     """
+
+    #Έλεγχος διαστάσεων δεδομένων
     dimensions = len(data[0])
-    centroids = centroids_init(dimensions,k)
+    for element in data:
+        if len(element) > dimensions or len(element) < dimensions:
+            raise ValueError("All data points must have the same number of dimensions")
+
+    #Δημιουργία αρχικών κέντρων
+    centroids = random.sample(data,k)
     
-    list_of_distances = []
-    for data_point in data:
-        distances = []
-        for centroid in centroids:
-            dist = float(np.linalg.norm(np.array(data_point) - np.array(centroid)))
-            distances.append(dist)
-        list_of_distances.append(distances)
+    #Υπολογισμός των αποστάσεων
+    list_of_distances = distance_calulator(data,centroids)
 
-    #κατηγοριοποίηση καθε στοιχείου.
-    cluster_assignments = []
-
+    #Κατηγοριοποίηση καθε στοιχείου.
+    assigned_cluster = []
     for i in list_of_distances:
-        cluster_assignments.append(i.index(min(i))+1)
+        assigned_cluster.append(i.index(min(i)))
+
+    #Υπολογισμός των ομάδων
+    clusters = []
+    for i in range(len(centroids)):
+        data_in_cluster = []
+        for j in range(len(assigned_cluster)):
+            if i == assigned_cluster[j]:
+                data_in_cluster.append(data[j])
+        clusters.append(data_in_cluster)
+
+    #TODO: Recalculate the centroids
+    #if new_centroid - old_centroid <= 10^-3: break
 
     
-    
-    return cluster_assignments
+    return clusters
 
 def main():
-    test = myKmeans([[1,1],[5,3],[10,10],[2,19],[19,2]], 2)
+    test = myKmeans([[1,1],[5,3],[10,10],[2,19],[19,2]], 3)
     print(test)
 
 if __name__ == "__main__":
