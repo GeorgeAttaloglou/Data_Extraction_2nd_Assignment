@@ -1,68 +1,66 @@
 import numpy as np
 import random
 
-def distance_calulator(data:list, centroids:list):
+def calculate_distances(data_points, centroids):
     """
-    Receives two lists of the same dimensions
-    Returns the distances of every data point from every centroid
-
+    Calculate distances from each data point to each centroid.
+    Args:
+        data_points (list): List of data points.
+        centroids (list): List of centroid coordinates.
+    Returns:
+        list: A list where each element contains distances of a data point to all centroids.
     """
-    list_of_distances = []
-    for data_point in data:
-        distances = []
-        for centroid in centroids:
-            dist = float(np.linalg.norm(np.array(data_point) - np.array(centroid)))
-            distances.append(dist)
-        list_of_distances.append(distances)
+    distances = []
+    for point in data_points:
+        distances_to_centroids = [
+            float(np.linalg.norm(np.array(point) - np.array(centroid)))
+            for centroid in centroids
+        ]
+        distances.append(distances_to_centroids)
+    return distances
 
-    return list_of_distances
 
-
-def myKmeans(data:list, k:int):
+def my_kmeans(data_points, k):
     """
-    The data list is rows: 1 for each object columns: ints of data for it like coordinates; data[0]=(1,2), data[1]=(3,2)
-    k is how many cluster centers you want
-    should return:
-    a multidimensional list of the center coordinates: return[0]=(return_x,return_y)
-    a list of the cluster values for each point of data
-
+    Perform k-means clustering on given data points.
+    Args:
+        data_points (list): List of data points, where each point is a list of coordinates.
+        k (int): Number of clusters.
+    Returns:
+        list: A list of clusters, where each cluster contains data points assigned to it.
     """
-
-    #Έλεγχος διαστάσεων δεδομένων
-    dimensions = len(data[0])
-    for element in data:
-        if len(element) > dimensions or len(element) < dimensions:
+    # Validate data dimensions
+    dimensions = len(data_points[0])
+    for point in data_points:
+        if len(point) != dimensions:
             raise ValueError("All data points must have the same number of dimensions")
 
-    #Δημιουργία αρχικών κέντρων
-    centroids = random.sample(data,k)
-    
-    #Υπολογισμός των αποστάσεων
-    list_of_distances = distance_calulator(data,centroids)
+    # Initialize centroids by randomly sampling from data points
+    centroids = random.sample(data_points, k)
 
-    #Κατηγοριοποίηση καθε στοιχείου.
-    assigned_cluster = []
-    for i in list_of_distances:
-        assigned_cluster.append(i.index(min(i)))
+    # Compute distances from data points to centroids
+    distances = calculate_distances(data_points, centroids)
 
-    #Υπολογισμός των ομάδων
-    clusters = []
-    for i in range(len(centroids)):
-        data_in_cluster = []
-        for j in range(len(assigned_cluster)):
-            if i == assigned_cluster[j]:
-                data_in_cluster.append(data[j])
-        clusters.append(data_in_cluster)
+    # Assign each data point to the nearest centroid
+    cluster_assignments = [
+        distances_to_centroids.index(min(distances_to_centroids))
+        for distances_to_centroids in distances
+    ]
 
-    #TODO: Recalculate the centroids
-    #if new_centroid - old_centroid <= 10^-3: break
+    # Group data points into clusters based on assignments
+    clusters = [[] for _ in range(k)]
+    for point_index, cluster_index in enumerate(cluster_assignments):
+        clusters[cluster_index].append(data_points[point_index])
 
-    
+    # TODO: Update centroids and repeat until convergence
     return clusters
 
+
 def main():
-    test = myKmeans([[1,1],[5,3],[10,10],[2,19],[19,2]], 3)
-    print(test)
+    test_data = [[1, 1], [5, 3], [10, 10], [2, 19], [19, 2]]
+    clusters = my_kmeans(test_data, 3)
+    print(clusters)
+
 
 if __name__ == "__main__":
     main()
