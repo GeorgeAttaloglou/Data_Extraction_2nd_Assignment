@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Σταθερά για ανοχή (e = 10^-3)
+e = 1e-3
+
 # Συνάρτηση απόστασης
 def distance(point1, point2):
     """
@@ -9,31 +12,46 @@ def distance(point1, point2):
     return np.sqrt(np.sum((point1 - point2) ** 2))
 
 # Συνάρτηση για k-means
-def mykmeans(data, K, max_iter=100, tol=1e-3):
+def mykmeans(Data, K):
     """
     Υλοποιεί τον αλγόριθμο k-means clustering.
     """
-    np.random.seed(42)  # Για αναπαραγωγιμότητα
-    indices = np.random.choice(data.shape[0], K, replace=False)  # Τυχαία αρχικά κέντρα
-    centers = data[indices]
+    np.random.seed(42)
+    """
+    Για αναπαραγωγιμότητα διότι χωρίς seed οι τιμές είναι διαφορετικές κάθε φορά 
+    και υπηρχε κινδυνος ατελείωτης επανάληψης (πιθανό addition μια max_itterations παράμετρος)
+    """
+    indices = np.random.choice(Data.shape[0], K, replace=False)  # Τυχαία αρχικά κέντρα
+    """
+    Data.shape[0] επιστρέφει τον αριθμό των γραμμών του Data (το σύνολο απο το οποίο θα γίνει επιλογή)
+    K ειναι ο αριθμός των κέντρων που θέλουμε να επιλέξουμε
+    replace=False σημαίνει ότι δεν επιτρέπεται η επιλογή του ίδιου αριθμού 
+    """
+    ClusterCenters = Data[indices]
 
-    for _ in range(max_iter):
+    while True:
         # Υπολογισμός αποστάσεων και ανάθεση σημείων
-        labels = []
-        for point in data:
-            distances = [distance(point, center) for center in centers]
-            labels.append(np.argmin(distances))
-        labels = np.array(labels)
+        IDC = []
+        for point in Data:
+            distances = [distance(point, center) for center in ClusterCenters] #Βοηθτιτική λίστα η οποια κραταει τις αποστάσεις του σημείου από κάθε κέντρο
+            IDC.append(np.argmin(distances))   #Ανάθεση σημείου στο κοντινότερο κέντρο
+        IDC = np.array(IDC) #Μετατροπή σε numpy array (με σκοπο ευκολοτερης χρήσης μαθηματικών συναρτήσεων)
 
         # Υπολογισμός νέων κέντρων
-        new_centers = np.array([data[labels == k].mean(axis=0) for k in range(K)])
+        new_ClusterCenters = np.array([Data[IDC == k].mean(axis=0) for k in range(K)])
+        """
+        - Υπολογίζει τα νέα κέντρα (centroids) για κάθε ομάδα.
+        - Επιλέγει όλα τα σημεία που ανήκουν σε μια ομάδα και υπολογίζει τον μέσο όρο των χαρακτηριστικών τους.
+        - Επαναλαμβάνει για όλες τις ομάδες (clusters) και δημιουργεί έναν πίνακα με τα νέα κέντρα.
+        """
 
-        # Έλεγχος σύγκλισης
-        if np.all(np.linalg.norm(new_centers - centers, axis=1) < tol):
+        # Έλεγχος σύγκλισης με βάση την σταθερά e
+        if np.all(np.linalg.norm(new_ClusterCenters - ClusterCenters, axis=1) < e):
             break
-        centers = new_centers
 
-    return centers, labels
+        ClusterCenters = new_ClusterCenters
+
+    return ClusterCenters, IDC
 
 # Συνάρτηση για δημιουργία δεδομένων
 def generate_data():
@@ -47,14 +65,14 @@ def generate_data():
     return np.vstack([x1, x2, x3])
 
 # Συνάρτηση για γραφική παράσταση
-def plot_results(data, centers, labels, K):
+def plot_results(Data, ClusterCenters, IDC, K):
     """
     Οπτικοποιεί τα αποτελέσματα του k-means clustering.
     """
     colors = ['red', 'green', 'blue']
     for k in range(K):
-        plt.scatter(data[labels == k][:, 0], data[labels == k][:, 1], c=colors[k], label=f'Cluster {k+1}')
-    plt.scatter(centers[:, 0], centers[:, 1], c='black', marker='+', s=200, label='Centers')
+        plt.scatter(Data[IDC == k][:, 0], Data[IDC == k][:, 1], c=colors[k], label=f'Cluster {k+1}')
+    plt.scatter(ClusterCenters[:, 0], ClusterCenters[:, 1], c='black', marker='+', s=200, label='Centers')
     plt.legend()
     plt.title('K-means Clustering')
     plt.xlabel('Χ1')
@@ -67,18 +85,18 @@ def main():
     Εκτελεί τη ροή του προγράμματος.
     """
     # Βήμα 1: Δημιουργία δεδομένων
-    data = generate_data()
+    Data = generate_data()
 
     # Βήμα 2: Ορισμός αριθμού ομάδων (K)
     K = 3
 
     # Βήμα 3: Εκτέλεση k-means
     print("Running k-means clustering...")
-    centers, labels = mykmeans(data, K)
+    ClusterCenters, IDC = mykmeans(Data, K)
 
     # Βήμα 4: Οπτικοποίηση αποτελεσμάτων
     print("Clustering completed. Plotting results...")
-    plot_results(data, centers, labels, K)
+    plot_results(Data, ClusterCenters, IDC, K)
 
 # Σημείο εκκίνησης του προγράμματος
 if __name__ == "__main__":
