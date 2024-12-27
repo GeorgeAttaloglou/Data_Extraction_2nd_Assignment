@@ -94,30 +94,29 @@ def plot_results(Data, ClusterCenters, IDC, K):
     Οπτικοποιεί τα αποτελέσματα του k-means clustering.
     """
     colors = ['red', 'green', 'blue']
+    markers = ['+', 's', 'p']
     for k in range(K):
+        # Σχεδίαση των σημείων κάθε cluster
         plt.scatter(Data[IDC == k][:, 0], Data[IDC == k][:, 1], c=colors[k], label=f'Cluster {k+1}')
         """
-        Για τα δεδομένα οπου:
         Data[IDC == k][:, 0]: Οι x συντεταγμένες των σημείων της ομάδας k.
         Data[IDC == k][:, 1]: Οι y συντεταγμένες των σημείων της ομάδας k.
         c=colors[k]: Καθορίζει το χρώμα για την ομάδα k.
         label=f'Cluster {k+1}': Προσθέτει μια ετικέτα (label) για την ομάδα k.
         """
-    plt.scatter(ClusterCenters[:, 0], ClusterCenters[:, 1], c='black', marker='+', s=200, label='Centers')
-    """
-    Για τα κέντρα όπου:
-    ClusterCenters[:, 0]: Οι xx-συντεταγμένες των κέντρων.
-    ClusterCenters[:, 1]: Οι yy-συντεταγμένες των κέντρων.
-    c='black': Τα κέντρα εμφανίζονται με μαύρο χρώμα.
-    marker='+': Το σύμβολο που χρησιμοποιείται για τα κέντρα.
-    TODO:θελει διαφορετικα συμβολα για καθε ομαδα
-    s=200: Το μέγεθος των συμβόλων.
-    """
+        # Σχεδίαση του κέντρου του cluster
+        plt.scatter(ClusterCenters[k, 0], ClusterCenters[k, 1], c='black', marker=markers[k], s=200, label=f'Center {k+1}')
+        """
+        ClusterCenters[k, 0]: Η x-συντεταγμένη του κέντρου k.
+        ClusterCenters[k, 1]: Η y-συντεταγμένη του κέντρου k.
+        marker=markers[k]: Το σύμβολο που χρησιμοποιείται για το κέντρο k.
+        """
     plt.legend()
     plt.title('K-means Clustering')
     plt.xlabel('Χ')
     plt.ylabel('Υ')
     plt.show()
+
 
     # Συνάρτηση για γράφημα SSE
 def plot_sse(sse_history):
