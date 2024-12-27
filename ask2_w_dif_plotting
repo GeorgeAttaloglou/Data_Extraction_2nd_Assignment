@@ -58,6 +58,10 @@ def mykmeans(Data, K):
             SSE += np.sum((np.linalg.norm(points_in_cluster - center, axis=1))**2)
         sse_history.append(SSE)
 
+        # Οπτικοποίηση αποτελεσμάτων για κάθε επανάληψη
+        plot_results(Data, new_ClusterCenters, IDC, K)
+        plt.show()  
+
         # Έλεγχος σύγκλισης με βάση την σταθερά e
         if np.all(np.linalg.norm(new_ClusterCenters - ClusterCenters, axis=1) < e):
             break
