@@ -54,6 +54,7 @@ def my_kmeans(data_points, k):
 
     #Αρχικοποίηση κέντρων
     centroids = random.sample(data_points, k)
+    sse_history = []
 
     while True:
         #Υπολογισμός αποστάσεων
@@ -76,6 +77,10 @@ def my_kmeans(data_points, k):
             for i, cluster in enumerate(clusters)
         ]
 
+        #Υπολογισμός του SSE
+        sse = calculate_sse(clusters, centroids)
+        sse_history.append(sse)
+
         #οπτικοποίηση βημάτων
         markers = ['+', 'x', 'o']
         colors = ['r', 'g', 'b']
@@ -90,9 +95,13 @@ def my_kmeans(data_points, k):
             break
         centroids = new_centroids
 
-    #Υπολογισμός του SSE
-    sse = calculate_sse(clusters, centroids)
-    print("SSE:", sse)
+    # Plot SSE history
+    plt.plot(range(1, len(sse_history) + 1), sse_history, marker='o')
+    plt.title("SSE Across Iterations")
+    plt.xlabel("Iteration")
+    plt.ylabel("SSE")
+    plt.grid()
+    plt.show()
     
     return centroids, cluster_assignments
 
